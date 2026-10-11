@@ -1,0 +1,1497 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMS Dashboard - Muhamad Dimas Nurzaky</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              stabilo: {
+                DEFAULT: "#CCFF00",
+                light: "#E2FF66",
+                bright: "#D8FF33",
+                emerald: "#84CC16",
+                glow: "rgba(204, 255, 0, 0.45)",
+              },
+              darkslate: "#0F172A",
+            },
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', "sans-serif"],
+              display: ['"Space Grotesk"', "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Supabase Config -->
+    <script src="supabase-config.js"></script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+      body {
+        background-color: #0f172a;
+        color: #f8fafc;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        min-height: 100vh;
+      }
+
+      .glass-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+      }
+
+      .glass-nav {
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .tab-btn.active {
+        background-color: #ccff00;
+        color: #0f172a;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body class="antialiased selection:bg-stabilo selection:text-slate-900 pb-20">
+    <!-- TOP NAVBAR -->
+    <header
+      class="glass-nav sticky top-0 z-40 px-4 sm:px-8 py-4 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <a
+          href="index.html"
+          class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-stabilo hover:border-stabilo transition-all"
+        >
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </a>
+        <div>
+          <h1
+            class="text-base sm:text-lg font-extrabold text-white flex items-center gap-2"
+          >
+            CMS Management
+            <span
+              class="text-[10px] bg-stabilo text-slate-900 font-extrabold px-2 py-0.5 rounded-full uppercase"
+              >Supabase</span
+            >
+          </h1>
+          <p class="text-[11px] text-slate-400">
+            Portofolio Muhamad Dimas Nurzaky
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div id="auth-status" class="hidden items-center gap-2">
+          <span
+            id="user-email"
+            class="text-xs text-slate-300 font-medium hidden sm:inline"
+          ></span>
+          <button
+            onclick="handleLogout()"
+            class="px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-bold transition-all flex items-center gap-1.5"
+          >
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Logout
+          </button>
+        </div>
+        <a
+          href="index.html"
+          target="_blank"
+          class="px-3.5 py-1.5 rounded-xl bg-stabilo text-slate-900 text-xs font-extrabold flex items-center gap-1.5 hover:bg-stabilo-bright transition-all shadow-md"
+        >
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Buka Website
+        </a>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8">
+      <!-- CONFIG WARNING IF NOT CONFIGURED -->
+      <div
+        id="config-alert"
+        class="hidden mb-8 p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200"
+      >
+        <div class="flex items-start gap-3">
+          <i
+            data-lucide="alert-triangle"
+            class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0"
+          ></i>
+          <div class="space-y-1 text-xs sm:text-sm">
+            <p class="font-bold text-amber-300">
+              Supabase belum dikonfigurasi!
+            </p>
+            <p class="text-slate-300">
+              Silakan buka file
+              <code class="bg-black/40 px-1.5 py-0.5 rounded text-stabilo"
+                >supabase-config.js</code
+              >
+              lalu isi <code class="text-amber-200">url</code> dan
+              <code class="text-amber-200">anonKey</code> dari Supabase
+              Dashboard Anda. Jangan lupa jalankan juga script
+              <code class="bg-black/40 px-1.5 py-0.5 rounded text-stabilo"
+                >supabase-schema.sql</code
+              >
+              di SQL Editor Supabase.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUTH LOGIN MODAL / SECTION -->
+      <div
+        id="login-section"
+        class="max-w-md mx-auto my-12 glass-card p-6 sm:p-8 rounded-3xl border border-slate-700/80 space-y-6 text-center"
+      >
+        <div
+          class="w-14 h-14 rounded-2xl bg-stabilo/10 border border-stabilo/30 text-stabilo flex items-center justify-center mx-auto"
+        >
+          <i data-lucide="lock" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-extrabold text-white">Login Admin CMS</h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Masuk dengan akun Supabase Auth Anda untuk mengelola konten
+            portofolio.
+          </p>
+        </div>
+        <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Email Admin</label
+            >
+            <input
+              type="email"
+              id="login-email"
+              required
+              placeholder="admin@email.com"
+              class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:outline-none focus:border-stabilo"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Password</label
+            >
+            <input
+              type="password"
+              id="login-password"
+              required
+              placeholder="••••••••"
+              class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:outline-none focus:border-stabilo"
+            />
+          </div>
+          <button
+            type="submit"
+            id="login-btn"
+            class="w-full py-3.5 rounded-xl bg-stabilo text-slate-900 font-extrabold text-sm hover:bg-stabilo-bright transition-all shadow-lg flex items-center justify-center gap-2"
+          >
+            <i data-lucide="log-in" class="w-4 h-4"></i> Masuk ke CMS
+          </button>
+        </form>
+        <p class="text-[11px] text-slate-500">
+          Belum punya user? Buat user admin di Supabase: <br />
+          <strong>Authentication &gt; Users &gt; Add user</strong>
+        </p>
+      </div>
+
+      <!-- DASHBOARD CONTENT (SHOWN WHEN LOGGED IN) -->
+      <div id="dashboard-content" class="hidden space-y-8">
+        <!-- TABS NAVIGATION -->
+        <div
+          class="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4"
+        >
+          <button
+            onclick="switchTab('projects')"
+            id="tab-btn-projects"
+            class="tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-300 bg-slate-800 hover:text-white transition-all flex items-center gap-2"
+          >
+            <i data-lucide="folder-git-2" class="w-4 h-4"></i> Proyek (<span
+              id="count-projects"
+              >0</span
+            >)
+          </button>
+          <button
+            onclick="switchTab('experiences')"
+            id="tab-btn-experiences"
+            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-300 bg-slate-800 hover:text-white transition-all flex items-center gap-2"
+          >
+            <i data-lucide="briefcase" class="w-4 h-4"></i> Pengalaman (<span
+              id="count-experiences"
+              >0</span
+            >)
+          </button>
+          <button
+            onclick="switchTab('certifications')"
+            id="tab-btn-certifications"
+            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-300 bg-slate-800 hover:text-white transition-all flex items-center gap-2"
+          >
+            <i data-lucide="award" class="w-4 h-4"></i> Sertifikasi (<span
+              id="count-certifications"
+              >0</span
+            >)
+          </button>
+          <button
+            onclick="switchTab('messages')"
+            id="tab-btn-messages"
+            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-300 bg-slate-800 hover:text-white transition-all flex items-center gap-2"
+          >
+            <i data-lucide="inbox" class="w-4 h-4"></i> Pesan Masuk (<span
+              id="count-messages"
+              >0</span
+            >)
+          </button>
+        </div>
+
+        <!-- TAB 1: PROJECTS -->
+        <div id="tab-projects" class="space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-extrabold text-white">
+                Kelola Proyek Portfolio
+              </h2>
+              <p class="text-xs text-slate-400">
+                Tambah, ubah, atau hapus proyek karya yang tampil di website.
+              </p>
+            </div>
+            <button
+              onclick="openProjectModal()"
+              class="px-4 py-2.5 rounded-xl bg-stabilo text-slate-900 font-extrabold text-xs sm:text-sm hover:bg-stabilo-bright transition-all flex items-center gap-2 shadow-lg"
+            >
+              <i data-lucide="plus" class="w-4 h-4"></i> Tambah Proyek
+            </button>
+          </div>
+          <div
+            id="projects-list"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <!-- Dynamic Projects List -->
+          </div>
+        </div>
+
+        <!-- TAB 2: EXPERIENCES -->
+        <div id="tab-experiences" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-extrabold text-white">
+                Kelola Pengalaman & Magang
+              </h2>
+              <p class="text-xs text-slate-400">
+                Riwayat kerja, posisi internship, dan bukti sertifikat
+                pendukung.
+              </p>
+            </div>
+            <button
+              onclick="openExperienceModal()"
+              class="px-4 py-2.5 rounded-xl bg-stabilo text-slate-900 font-extrabold text-xs sm:text-sm hover:bg-stabilo-bright transition-all flex items-center gap-2 shadow-lg"
+            >
+              <i data-lucide="plus" class="w-4 h-4"></i> Tambah Pengalaman
+            </button>
+          </div>
+          <div id="experiences-list" class="space-y-4">
+            <!-- Dynamic Experiences List -->
+          </div>
+        </div>
+
+        <!-- TAB 3: CERTIFICATIONS -->
+        <div id="tab-certifications" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-extrabold text-white">
+                Kelola Sertifikasi & Kredensial
+              </h2>
+              <p class="text-xs text-slate-400">
+                Lisensi kompetensi profesional dan verifikasi kredensial.
+              </p>
+            </div>
+            <button
+              onclick="openCertificationModal()"
+              class="px-4 py-2.5 rounded-xl bg-stabilo text-slate-900 font-extrabold text-xs sm:text-sm hover:bg-stabilo-bright transition-all flex items-center gap-2 shadow-lg"
+            >
+              <i data-lucide="plus" class="w-4 h-4"></i> Tambah Sertifikasi
+            </button>
+          </div>
+          <div id="certifications-list" class="space-y-4">
+            <!-- Dynamic Certifications List -->
+          </div>
+        </div>
+
+        <!-- TAB 4: MESSAGES -->
+        <div id="tab-messages" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-extrabold text-white">
+                Pesan Masuk (Form Kontak)
+              </h2>
+              <p class="text-xs text-slate-400">
+                Pesan dan tawaran kolaborasi yang dikirimkan oleh pengunjung
+                website.
+              </p>
+            </div>
+            <button
+              onclick="loadMessages()"
+              class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold flex items-center gap-1.5"
+            >
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+            </button>
+          </div>
+          <div id="messages-list" class="space-y-4">
+            <!-- Dynamic Messages List -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL FORM: PROJECT -->
+    <div
+      id="modal-project"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4"
+    >
+      <div
+        class="glass-card max-w-xl w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto border border-slate-700"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-700/80 pb-3"
+        >
+          <h3
+            id="modal-project-title"
+            class="text-lg font-extrabold text-white"
+          >
+            Tambah Proyek
+          </h3>
+          <button
+            onclick="closeModal('modal-project')"
+            class="text-slate-400 hover:text-white"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <form onsubmit="saveProject(event)" class="space-y-4">
+          <input type="hidden" id="proj-id" />
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Judul Proyek</label
+            >
+            <input
+              type="text"
+              id="proj-title"
+              required
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Deskripsi Singkat</label
+            >
+            <textarea
+              id="proj-desc"
+              rows="3"
+              required
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            ></textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Kategori</label
+              >
+              <input
+                type="text"
+                id="proj-category"
+                placeholder="Contoh: Web Development"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Badge Tag</label
+              >
+              <input
+                type="text"
+                id="proj-badge"
+                placeholder="Contoh: Laravel / React"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Tech Stack & Tools (Pisahkan koma)</label
+            >
+            <input
+              type="text"
+              id="proj-tags"
+              required
+              placeholder="Laravel, PHP, MySQL, Tailwind CSS"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            />
+          </div>
+          <div
+            class="space-y-2 rounded-2xl border border-slate-700/80 bg-slate-900/50 p-4"
+          >
+            <p class="text-xs font-bold text-stabilo uppercase">
+              Media & Link Proyek
+            </p>
+            <label class="block text-xs font-bold text-slate-300"
+              >Gambar proyek (JPG, PNG, WebP, maksimal 2 MB)</label
+            >
+            <input
+              type="file"
+              id="proj-image-file"
+              accept="image/jpeg,image/png,image/webp"
+              class="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-stabilo file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-slate-900"
+            />
+            <input
+              type="url"
+              id="proj-image-url"
+              placeholder="Atau URL gambar https://..."
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="url"
+                id="proj-demo"
+                placeholder="Demo / Live URL https://..."
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+              <input
+                type="url"
+                id="proj-github"
+                placeholder="Repository GitHub https://github.com/..."
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+            <p
+              id="proj-image-current"
+              class="text-[11px] text-slate-500 break-all"
+            ></p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Urutan Tampil (Sort Order)</label
+              >
+              <input
+                type="number"
+                id="proj-sort"
+                value="1"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+          </div>
+          <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <button
+              type="button"
+              onclick="closeModal('modal-project')"
+              class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded-xl bg-stabilo text-slate-900 text-xs font-extrabold hover:bg-stabilo-bright"
+            >
+              Simpan Proyek
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL FORM: EXPERIENCE -->
+    <div
+      id="modal-experience"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4"
+    >
+      <div
+        class="glass-card max-w-xl w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto border border-slate-700"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-700/80 pb-3"
+        >
+          <h3 id="modal-exp-title" class="text-lg font-extrabold text-white">
+            Tambah Pengalaman
+          </h3>
+          <button
+            onclick="closeModal('modal-experience')"
+            class="text-slate-400 hover:text-white"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <form onsubmit="saveExperience(event)" class="space-y-4">
+          <input type="hidden" id="exp-id" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Perusahaan / Instansi</label
+              >
+              <input
+                type="text"
+                id="exp-company"
+                required
+                placeholder="PT DENSO Indonesia"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Tipe (INTERNSHIP / FULLTIME)</label
+              >
+              <input
+                type="text"
+                id="exp-type"
+                value="INTERNSHIP"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Posisi / Role</label
+            >
+            <input
+              type="text"
+              id="exp-role"
+              required
+              placeholder="Web Development Intern"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Badge Stack</label
+            >
+            <input
+              type="text"
+              id="exp-stack"
+              placeholder="Laravel & MySQL"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Poin Tugas (1 baris per poin)</label
+            >
+            <textarea
+              id="exp-points"
+              rows="4"
+              placeholder="Merancang RESTful API...&#10;Optimasi database..."
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            ></textarea>
+          </div>
+          <div class="border-t border-slate-800 pt-3">
+            <p class="text-xs font-bold text-stabilo uppercase mb-2">
+              Informasi Sertifikat / Bukti
+            </p>
+            <div class="space-y-3">
+              <input
+                type="text"
+                id="exp-cert-title"
+                placeholder="Nama Sertifikat Bukti"
+                class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-stabilo focus:outline-none"
+              />
+              <input
+                type="text"
+                id="exp-cert-id"
+                placeholder="ID Sertifikat (contoh: DENSO-INT-2023/889)"
+                class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-stabilo focus:outline-none"
+              />
+              <textarea
+                id="exp-cert-desc"
+                rows="2"
+                placeholder="Deskripsi verifikasi sertifikat..."
+                class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-stabilo focus:outline-none"
+              ></textarea>
+              <label class="block text-xs font-bold text-slate-300"
+                >Gambar bukti (JPG, PNG, WebP, maksimal 2 MB)</label
+              >
+              <input
+                type="file"
+                id="exp-image-file"
+                accept="image/jpeg,image/png,image/webp"
+                class="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-stabilo file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-slate-900"
+              />
+              <input
+                type="url"
+                id="exp-image-url"
+                placeholder="Atau URL attachment https://..."
+                class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-stabilo focus:outline-none"
+              />
+              <p
+                id="exp-image-current"
+                class="text-[11px] text-slate-500 break-all"
+              ></p>
+            </div>
+          </div>
+          <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <button
+              type="button"
+              onclick="closeModal('modal-experience')"
+              class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded-xl bg-stabilo text-slate-900 text-xs font-extrabold hover:bg-stabilo-bright"
+            >
+              Simpan Pengalaman
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL FORM: CERTIFICATION -->
+    <div
+      id="modal-certification"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4"
+    >
+      <div
+        class="glass-card max-w-xl w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto border border-slate-700"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-700/80 pb-3"
+        >
+          <h3 id="modal-cert-title" class="text-lg font-extrabold text-white">
+            Tambah Sertifikasi
+          </h3>
+          <button
+            onclick="closeModal('modal-certification')"
+            class="text-slate-400 hover:text-white"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <form onsubmit="saveCertification(event)" class="space-y-4">
+          <input type="hidden" id="cert-id" />
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Judul Sertifikasi</label
+            >
+            <input
+              type="text"
+              id="cert-name"
+              required
+              placeholder="AWS Cloud Practitioner Essentials"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Penerbit (Issuer)</label
+              >
+              <input
+                type="text"
+                id="cert-issuer"
+                required
+                placeholder="Amazon Web Services"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Tanggal / Bulan Terbit</label
+              >
+              <input
+                type="text"
+                id="cert-date"
+                required
+                placeholder="Jul 2025"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-1"
+              >Deskripsi Kompetensi</label
+            >
+            <textarea
+              id="cert-desc"
+              rows="3"
+              required
+              placeholder="Validasi pemahaman komprehensif..."
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            ></textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Credential ID (Opsional)</label
+              >
+              <input
+                type="text"
+                id="cert-credential-id"
+                placeholder="AWS-TRN-77821-CLD"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-300 uppercase mb-1"
+                >Credential URL (Opsional)</label
+              >
+              <input
+                type="text"
+                id="cert-url"
+                placeholder="https://..."
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+              />
+            </div>
+          </div>
+          <div
+            class="space-y-2 rounded-2xl border border-slate-700/80 bg-slate-900/50 p-4"
+          >
+            <p class="text-xs font-bold text-stabilo uppercase">
+              Attachment Sertifikat
+            </p>
+            <label class="block text-xs font-bold text-slate-300"
+              >Gambar sertifikat (JPG, PNG, WebP, maksimal 2 MB)</label
+            >
+            <input
+              type="file"
+              id="cert-image-file"
+              accept="image/jpeg,image/png,image/webp"
+              class="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-stabilo file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-slate-900"
+            />
+            <input
+              type="url"
+              id="cert-image-url"
+              placeholder="Atau URL attachment https://..."
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-stabilo focus:outline-none"
+            />
+            <p
+              id="cert-image-current"
+              class="text-[11px] text-slate-500 break-all"
+            ></p>
+          </div>
+          <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <button
+              type="button"
+              onclick="closeModal('modal-certification')"
+              class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded-xl bg-stabilo text-slate-900 text-xs font-extrabold hover:bg-stabilo-bright"
+            >
+              Simpan Sertifikasi
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div
+      id="toast"
+      class="fixed top-6 right-6 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none"
+    >
+      <div
+        class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3"
+      >
+        <div
+          class="w-6 h-6 rounded-full bg-stabilo text-slate-900 flex items-center justify-center text-xs font-bold"
+        >
+          ✓
+        </div>
+        <p id="toast-msg" class="text-xs font-bold text-white">Berhasil!</p>
+      </div>
+    </div>
+
+    <script>
+      lucide.createIcons();
+
+      // Check if config exists
+      if (!isSupabaseConfigured()) {
+        document.getElementById("config-alert").classList.remove("hidden");
+      }
+
+      // Check initial session
+      async function checkSession() {
+        if (!supabaseClient) return;
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        if (session) {
+          showDashboard(session.user);
+        } else {
+          showLogin();
+        }
+      }
+      checkSession();
+
+      function showLogin() {
+        document.getElementById("login-section").classList.remove("hidden");
+        document.getElementById("dashboard-content").classList.add("hidden");
+        document.getElementById("auth-status").classList.add("hidden");
+        document.getElementById("auth-status").classList.remove("flex");
+      }
+
+      function showDashboard(user) {
+        document.getElementById("login-section").classList.add("hidden");
+        document.getElementById("dashboard-content").classList.remove("hidden");
+        document.getElementById("auth-status").classList.remove("hidden");
+        document.getElementById("auth-status").classList.add("flex");
+        document.getElementById("user-email").textContent = user.email;
+        loadAllData();
+      }
+
+      async function handleLogin(e) {
+        e.preventDefault();
+        if (!supabaseClient) {
+          alert("Supabase belum dikonfigurasi di supabase-config.js");
+          return;
+        }
+        const email = document.getElementById("login-email").value;
+        const password = document.getElementById("login-password").value;
+        const btn = document.getElementById("login-btn");
+        btn.innerHTML = "Memproses...";
+        btn.disabled = true;
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) {
+          alert("Gagal login: " + error.message);
+          btn.innerHTML =
+            '<i data-lucide="log-in" class="w-4 h-4"></i> Masuk ke CMS';
+          btn.disabled = false;
+          lucide.createIcons();
+        } else {
+          showDashboard(data.user);
+          showToast("Login berhasil!");
+        }
+      }
+
+      async function handleLogout() {
+        if (supabaseClient) {
+          await supabaseClient.auth.signOut();
+        }
+        showLogin();
+        showToast("Anda telah logout");
+      }
+
+      function switchTab(tab) {
+        ["projects", "experiences", "certifications", "messages"].forEach(
+          (t) => {
+            document.getElementById(`tab-${t}`).classList.add("hidden");
+            document.getElementById(`tab-btn-${t}`).classList.remove("active");
+          },
+        );
+        document.getElementById(`tab-${tab}`).classList.remove("hidden");
+        document.getElementById(`tab-btn-${tab}`).classList.add("active");
+      }
+
+      function closeModal(id) {
+        document.getElementById(id).classList.add("hidden");
+        document.getElementById(id).classList.remove("flex");
+      }
+
+      function openModalElem(id) {
+        const m = document.getElementById(id);
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+        lucide.createIcons();
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById("toast");
+        document.getElementById("toast-msg").textContent = msg;
+        toast.classList.remove("translate-y-[-100px]", "opacity-0");
+        toast.classList.add("translate-y-0", "opacity-100");
+        setTimeout(() => {
+          toast.classList.add("translate-y-[-100px]", "opacity-0");
+          toast.classList.remove("translate-y-0", "opacity-100");
+        }, 3000);
+      }
+
+      const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+      const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+      async function resolveImageUrl(
+        fileInputId,
+        urlInputId,
+        folder,
+        currentUrl = "",
+      ) {
+        const file = document.getElementById(fileInputId).files[0];
+        const typedUrl = document.getElementById(urlInputId).value.trim();
+
+        if (!file) return typedUrl || currentUrl || "";
+        if (!IMAGE_TYPES.includes(file.type)) {
+          throw new Error("Format gambar harus JPG, PNG, atau WebP.");
+        }
+        if (file.size > MAX_IMAGE_SIZE) {
+          throw new Error("Ukuran gambar maksimal 2 MB.");
+        }
+        if (!supabaseClient) {
+          throw new Error("Supabase belum dikonfigurasi untuk upload gambar.");
+        }
+
+        const extension = file.name.split(".").pop().toLowerCase();
+        const path = `${folder}/${crypto.randomUUID()}.${extension}`;
+        const { error } = await supabaseClient.storage
+          .from("portfolio-assets")
+          .upload(path, file, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type,
+          });
+        if (error) throw error;
+
+        const { data } = supabaseClient.storage
+          .from("portfolio-assets")
+          .getPublicUrl(path);
+        return data.publicUrl;
+      }
+
+      function setImageFields(urlInputId, currentId, value) {
+        document.getElementById(urlInputId).value = value || "";
+        document.getElementById(currentId).textContent = value
+          ? `Attachment saat ini: ${value}`
+          : "";
+      }
+
+      // ==========================================
+      // DATA LOADERS
+      // ==========================================
+      async function loadAllData() {
+        loadProjects();
+        loadExperiences();
+        loadCertifications();
+        loadMessages();
+      }
+
+      // 1. PROJECTS
+      let currentProjects = [];
+      async function loadProjects() {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient
+          .from("projects")
+          .select("*")
+          .order("sort_order", { ascending: true });
+        if (error) {
+          console.error(error);
+          return;
+        }
+        currentProjects = data || [];
+        document.getElementById("count-projects").textContent =
+          currentProjects.length;
+
+        const list = document.getElementById("projects-list");
+        list.innerHTML = "";
+        currentProjects.forEach((p) => {
+          const card = document.createElement("div");
+          card.className =
+            "glass-card p-5 rounded-2xl border border-slate-700/80 space-y-3 flex flex-col justify-between";
+          card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-[10px] bg-stabilo/20 text-stabilo border border-stabilo/30 font-extrabold px-2 py-0.5 rounded-md uppercase">${p.badge || p.category || "PROJECT"}</span>
+                            <span class="text-xs text-slate-500 font-mono">Order: #${p.sort_order || 0}</span>
+                        </div>
+                        <h4 class="font-extrabold text-white text-base">${p.title}</h4>
+                        <p class="text-xs text-slate-400 mt-1 line-clamp-2">${p.description}</p>
+                        <p class="text-[11px] text-slate-500 font-mono mt-2">${p.tags}</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+                        <button onclick="editProject('${p.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1">
+                            <i data-lucide="edit-2" class="w-3 h-3"></i> Edit
+                        </button>
+                        <button onclick="deleteProject('${p.id}')" class="px-3 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-xs font-bold text-red-400 flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i> Hapus
+                        </button>
+                    </div>
+                `;
+          list.appendChild(card);
+        });
+        lucide.createIcons();
+      }
+
+      function openProjectModal() {
+        document.getElementById("proj-id").value = "";
+        document.getElementById("proj-title").value = "";
+        document.getElementById("proj-desc").value = "";
+        document.getElementById("proj-category").value = "";
+        document.getElementById("proj-badge").value = "";
+        document.getElementById("proj-tags").value = "";
+        document.getElementById("proj-image-file").value = "";
+        setImageFields("proj-image-url", "proj-image-current", "");
+        document.getElementById("proj-demo").value = "";
+        document.getElementById("proj-github").value = "";
+        document.getElementById("proj-sort").value = currentProjects.length + 1;
+        document.getElementById("modal-project-title").textContent =
+          "Tambah Proyek Baru";
+        openModalElem("modal-project");
+      }
+
+      function editProject(id) {
+        const p = currentProjects.find((item) => item.id === id);
+        if (!p) return;
+        document.getElementById("proj-id").value = p.id;
+        document.getElementById("proj-title").value = p.title;
+        document.getElementById("proj-desc").value = p.description;
+        document.getElementById("proj-category").value = p.category || "";
+        document.getElementById("proj-badge").value = p.badge || "";
+        document.getElementById("proj-tags").value = p.tags || "";
+        document.getElementById("proj-image-file").value = "";
+        setImageFields("proj-image-url", "proj-image-current", p.image_url);
+        document.getElementById("proj-demo").value = p.demo_url || "";
+        document.getElementById("proj-github").value = p.github_url || "";
+        document.getElementById("proj-sort").value = p.sort_order || 1;
+        document.getElementById("modal-project-title").textContent =
+          "Edit Proyek";
+        openModalElem("modal-project");
+      }
+
+      async function saveProject(e) {
+        e.preventDefault();
+        const id = document.getElementById("proj-id").value;
+        let imageUrl = "";
+        try {
+          imageUrl = await resolveImageUrl(
+            "proj-image-file",
+            "proj-image-url",
+            "projects",
+            id ? currentProjects.find((item) => item.id === id)?.image_url : "",
+          );
+        } catch (error) {
+          alert(error.message);
+          return;
+        }
+        const payload = {
+          title: document.getElementById("proj-title").value,
+          description: document.getElementById("proj-desc").value,
+          category: document.getElementById("proj-category").value,
+          badge: document.getElementById("proj-badge").value,
+          tags: document.getElementById("proj-tags").value,
+          image_url: imageUrl,
+          demo_url: document.getElementById("proj-demo").value,
+          github_url: document.getElementById("proj-github").value,
+          sort_order: parseInt(document.getElementById("proj-sort").value) || 1,
+        };
+
+        let res;
+        if (id) {
+          res = await supabaseClient
+            .from("projects")
+            .update(payload)
+            .eq("id", id);
+        } else {
+          res = await supabaseClient.from("projects").insert([payload]);
+        }
+
+        if (res.error) {
+          alert("Gagal menyimpan proyek: " + res.error.message);
+        } else {
+          closeModal("modal-project");
+          loadProjects();
+          showToast("Proyek berhasil disimpan!");
+        }
+      }
+
+      async function deleteProject(id) {
+        if (!confirm("Hapus proyek ini?")) return;
+        const { error } = await supabaseClient
+          .from("projects")
+          .delete()
+          .eq("id", id);
+        if (error) alert(error.message);
+        else {
+          loadProjects();
+          showToast("Proyek berhasil dihapus");
+        }
+      }
+
+      // 2. EXPERIENCES
+      let currentExperiences = [];
+      async function loadExperiences() {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient
+          .from("experiences")
+          .select("*")
+          .order("sort_order", { ascending: true });
+        if (error) return;
+        currentExperiences = data || [];
+        document.getElementById("count-experiences").textContent =
+          currentExperiences.length;
+
+        const list = document.getElementById("experiences-list");
+        list.innerHTML = "";
+        currentExperiences.forEach((exp) => {
+          const points = Array.isArray(exp.description_points)
+            ? exp.description_points
+            : [];
+          const card = document.createElement("div");
+          card.className =
+            "glass-card p-6 rounded-2xl border border-slate-700/80 space-y-3";
+          card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] bg-slate-800 text-white font-extrabold px-2.5 py-1 rounded-md uppercase">${exp.type || "INTERNSHIP"}</span>
+                            <h4 class="text-base sm:text-lg font-extrabold text-white mt-1.5">${exp.role}</h4>
+                            <p class="text-xs font-semibold text-slate-400">${exp.company}</p>
+                        </div>
+                        <span class="text-xs font-bold text-stabilo bg-slate-900 px-3 py-1 rounded-xl border border-slate-700 w-fit">${exp.stack_badge || ""}</span>
+                    </div>
+                    <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
+                        ${points.map((pt) => `<li>${pt}</li>`).join("")}
+                    </ul>
+                    <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+                        <span class="text-xs text-slate-500 font-mono">Sertifikat: ${exp.cert_id || "-"}</span>
+                        <div class="flex gap-2">
+                            <button onclick="editExperience('${exp.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1">
+                                <i data-lucide="edit-2" class="w-3 h-3"></i> Edit
+                            </button>
+                            <button onclick="deleteExperience('${exp.id}')" class="px-3 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-xs font-bold text-red-400 flex items-center gap-1">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                `;
+          list.appendChild(card);
+        });
+        lucide.createIcons();
+      }
+
+      function openExperienceModal() {
+        document.getElementById("exp-id").value = "";
+        document.getElementById("exp-company").value = "";
+        document.getElementById("exp-type").value = "INTERNSHIP";
+        document.getElementById("exp-role").value = "";
+        document.getElementById("exp-stack").value = "";
+        document.getElementById("exp-points").value = "";
+        document.getElementById("exp-cert-title").value = "";
+        document.getElementById("exp-cert-id").value = "";
+        document.getElementById("exp-cert-desc").value = "";
+        document.getElementById("exp-image-file").value = "";
+        setImageFields("exp-image-url", "exp-image-current", "");
+        document.getElementById("modal-exp-title").textContent =
+          "Tambah Pengalaman Baru";
+        openModalElem("modal-experience");
+      }
+
+      function editExperience(id) {
+        const exp = currentExperiences.find((item) => item.id === id);
+        if (!exp) return;
+        document.getElementById("exp-id").value = exp.id;
+        document.getElementById("exp-company").value = exp.company;
+        document.getElementById("exp-type").value = exp.type || "INTERNSHIP";
+        document.getElementById("exp-role").value = exp.role;
+        document.getElementById("exp-stack").value = exp.stack_badge || "";
+        const pts = Array.isArray(exp.description_points)
+          ? exp.description_points.join("\n")
+          : "";
+        document.getElementById("exp-points").value = pts;
+        document.getElementById("exp-cert-title").value = exp.cert_title || "";
+        document.getElementById("exp-cert-id").value = exp.cert_id || "";
+        document.getElementById("exp-cert-desc").value = exp.cert_desc || "";
+        document.getElementById("exp-image-file").value = "";
+        setImageFields(
+          "exp-image-url",
+          "exp-image-current",
+          exp.attachment_url,
+        );
+        document.getElementById("modal-exp-title").textContent =
+          "Edit Pengalaman";
+        openModalElem("modal-experience");
+      }
+
+      async function saveExperience(e) {
+        e.preventDefault();
+        const id = document.getElementById("exp-id").value;
+        const pointsArray = document
+          .getElementById("exp-points")
+          .value.split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        let attachmentUrl = "";
+        try {
+          attachmentUrl = await resolveImageUrl(
+            "exp-image-file",
+            "exp-image-url",
+            "experiences",
+            id
+              ? currentExperiences.find((item) => item.id === id)
+                  ?.attachment_url
+              : "",
+          );
+        } catch (error) {
+          alert(error.message);
+          return;
+        }
+        const payload = {
+          company: document.getElementById("exp-company").value,
+          type: document.getElementById("exp-type").value,
+          role: document.getElementById("exp-role").value,
+          stack_badge: document.getElementById("exp-stack").value,
+          description_points: pointsArray,
+          cert_title: document.getElementById("exp-cert-title").value,
+          cert_id: document.getElementById("exp-cert-id").value,
+          cert_desc: document.getElementById("exp-cert-desc").value,
+          attachment_url: attachmentUrl,
+        };
+
+        let res;
+        if (id) {
+          res = await supabaseClient
+            .from("experiences")
+            .update(payload)
+            .eq("id", id);
+        } else {
+          res = await supabaseClient.from("experiences").insert([payload]);
+        }
+
+        if (res.error) alert(res.error.message);
+        else {
+          closeModal("modal-experience");
+          loadExperiences();
+          showToast("Pengalaman berhasil disimpan");
+        }
+      }
+
+      async function deleteExperience(id) {
+        if (!confirm("Hapus pengalaman ini?")) return;
+        const { error } = await supabaseClient
+          .from("experiences")
+          .delete()
+          .eq("id", id);
+        if (error) alert(error.message);
+        else {
+          loadExperiences();
+          showToast("Pengalaman dihapus");
+        }
+      }
+
+      // 3. CERTIFICATIONS
+      let currentCerts = [];
+      async function loadCertifications() {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient
+          .from("certifications")
+          .select("*")
+          .order("sort_order", { ascending: true });
+        if (error) return;
+        currentCerts = data || [];
+        document.getElementById("count-certifications").textContent =
+          currentCerts.length;
+
+        const list = document.getElementById("certifications-list");
+        list.innerHTML = "";
+        currentCerts.forEach((c) => {
+          const card = document.createElement("div");
+          card.className =
+            "glass-card p-5 rounded-2xl border border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4";
+          card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] bg-stabilo text-slate-900 font-extrabold px-2.5 py-0.5 rounded-full">${c.issue_date}</span>
+                            <span class="text-xs text-slate-400 font-mono">${c.credential_id || ""}</span>
+                        </div>
+                        <h4 class="font-extrabold text-white text-base">${c.title}</h4>
+                        <p class="text-xs font-semibold text-slate-400">${c.issuer}</p>
+                        <p class="text-xs text-slate-300">${c.description}</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button onclick="editCertification('${c.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1">
+                            <i data-lucide="edit-2" class="w-3 h-3"></i> Edit
+                        </button>
+                        <button onclick="deleteCertification('${c.id}')" class="px-3 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-xs font-bold text-red-400 flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i> Hapus
+                        </button>
+                    </div>
+                `;
+          list.appendChild(card);
+        });
+        lucide.createIcons();
+      }
+
+      function openCertificationModal() {
+        document.getElementById("cert-id").value = "";
+        document.getElementById("cert-name").value = "";
+        document.getElementById("cert-issuer").value = "";
+        document.getElementById("cert-date").value = "";
+        document.getElementById("cert-desc").value = "";
+        document.getElementById("cert-credential-id").value = "";
+        document.getElementById("cert-url").value = "";
+        document.getElementById("cert-image-file").value = "";
+        setImageFields("cert-image-url", "cert-image-current", "");
+        document.getElementById("modal-cert-title").textContent =
+          "Tambah Sertifikasi";
+        openModalElem("modal-certification");
+      }
+
+      function editCertification(id) {
+        const c = currentCerts.find((item) => item.id === id);
+        if (!c) return;
+        document.getElementById("cert-id").value = c.id;
+        document.getElementById("cert-name").value = c.title;
+        document.getElementById("cert-issuer").value = c.issuer;
+        document.getElementById("cert-date").value = c.issue_date;
+        document.getElementById("cert-desc").value = c.description;
+        document.getElementById("cert-credential-id").value =
+          c.credential_id || "";
+        document.getElementById("cert-url").value = c.credential_url || "";
+        document.getElementById("cert-image-file").value = "";
+        setImageFields(
+          "cert-image-url",
+          "cert-image-current",
+          c.attachment_url,
+        );
+        document.getElementById("modal-cert-title").textContent =
+          "Edit Sertifikasi";
+        openModalElem("modal-certification");
+      }
+
+      async function saveCertification(e) {
+        e.preventDefault();
+        const id = document.getElementById("cert-id").value;
+        let attachmentUrl = "";
+        try {
+          attachmentUrl = await resolveImageUrl(
+            "cert-image-file",
+            "cert-image-url",
+            "certifications",
+            id
+              ? currentCerts.find((item) => item.id === id)?.attachment_url
+              : "",
+          );
+        } catch (error) {
+          alert(error.message);
+          return;
+        }
+        const payload = {
+          title: document.getElementById("cert-name").value,
+          issuer: document.getElementById("cert-issuer").value,
+          issue_date: document.getElementById("cert-date").value,
+          description: document.getElementById("cert-desc").value,
+          credential_id: document.getElementById("cert-credential-id").value,
+          credential_url: document.getElementById("cert-url").value,
+          attachment_url: attachmentUrl,
+        };
+
+        let res;
+        if (id) {
+          res = await supabaseClient
+            .from("certifications")
+            .update(payload)
+            .eq("id", id);
+        } else {
+          res = await supabaseClient.from("certifications").insert([payload]);
+        }
+
+        if (res.error) alert(res.error.message);
+        else {
+          closeModal("modal-certification");
+          loadCertifications();
+          showToast("Sertifikasi berhasil disimpan");
+        }
+      }
+
+      async function deleteCertification(id) {
+        if (!confirm("Hapus sertifikasi ini?")) return;
+        const { error } = await supabaseClient
+          .from("certifications")
+          .delete()
+          .eq("id", id);
+        if (error) alert(error.message);
+        else {
+          loadCertifications();
+          showToast("Sertifikasi berhasil dihapus");
+        }
+      }
+
+      // 4. MESSAGES
+      async function loadMessages() {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient
+          .from("messages")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error) return;
+        const messages = data || [];
+        document.getElementById("count-messages").textContent = messages.length;
+
+        const list = document.getElementById("messages-list");
+        list.innerHTML = "";
+        if (messages.length === 0) {
+          list.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs">Belum ada pesan masuk dari formulir kontak.</div>`;
+          return;
+        }
+        messages.forEach((msg) => {
+          const dateStr = new Date(msg.created_at).toLocaleString("id-ID");
+          const card = document.createElement("div");
+          card.className =
+            "glass-card p-5 rounded-2xl border border-slate-700/80 space-y-3";
+          card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-white text-sm">${msg.name}</h4>
+                                <span class="text-[10px] bg-slate-800 text-stabilo px-2 py-0.5 rounded-md font-mono">${msg.topic || "General"}</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">${msg.email}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[11px] text-slate-500 font-mono">${dateStr}</span>
+                            <button onclick="deleteMessage('${msg.id}')" class="text-red-400 hover:text-red-300 p-1.5 rounded-lg bg-red-500/10">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-200 whitespace-pre-wrap leading-relaxed">${msg.message}</p>
+                `;
+          list.appendChild(card);
+        });
+        lucide.createIcons();
+      }
+
+      async function deleteMessage(id) {
+        if (!confirm("Hapus pesan ini?")) return;
+        const { error } = await supabaseClient
+          .from("messages")
+          .delete()
+          .eq("id", id);
+        if (error) alert(error.message);
+        else {
+          loadMessages();
+          showToast("Pesan berhasil dihapus");
+        }
+      }
+    </script>
+  </body>
+</html>
