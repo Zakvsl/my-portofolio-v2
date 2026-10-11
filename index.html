@@ -6,6 +6,7 @@
     <title>
       Muhamad Dimas Nurzaky - Portfolio | Telkom University & Web Developer
     </title>
+    <link rel="icon" type="image/png" href="LogoZak.png" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -471,6 +472,29 @@
         transform: translateY(0) scale(1);
       }
 
+      .reveal-item {
+        opacity: 0;
+        transform: translateY(22px);
+        transition:
+          opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        transition-delay: var(--reveal-delay, 0s);
+      }
+
+      .reveal-item.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .reveal-on-scroll,
+        .reveal-item {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
+      }
+
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
         height: 6px;
@@ -667,18 +691,12 @@
                 Lihat Projects
                 <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
               </a>
-              <a
-                href="#contact"
-                class="px-7 py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-sm sm:text-base hover:bg-slate-800 transition-all shadow-md flex items-center gap-2 transform hover:-translate-y-1"
-              >
-                Hubungi Saya
-                <i data-lucide="mail" class="w-4 h-4 text-stabilo"></i>
-              </a>
               <button
                 onclick="downloadCV()"
-                class="px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-all border border-slate-300/80 flex items-center gap-2"
+                class="px-7 py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-sm sm:text-base hover:bg-slate-800 transition-all shadow-md flex items-center gap-2 transform hover:-translate-y-1"
               >
-                <i data-lucide="download" class="w-4 h-4"></i> Download CV
+                <i data-lucide="download" class="w-4 h-4 text-stabilo"></i>
+                <span data-i18n="Download CV">Download CV</span>
               </button>
             </div>
           </div>
@@ -931,7 +949,7 @@
                     >Keahlian Inti</span
                   >
                   <h4 class="text-lg font-bold text-slate-900">
-                    REST API & Power Platform
+                    Web Development & Digital Workflow Automation
                   </h4>
                   <p class="text-xs text-slate-600">
                     Laravel/PHP, MySQL Architecture, Microsoft Power Apps, Power
@@ -962,7 +980,7 @@
               class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-stabilo/30 text-slate-900 text-xs font-extrabold uppercase tracking-wider"
             >
               <i data-lucide="briefcase" class="w-3.5 h-3.5"></i> Pengalaman
-              Kerja 
+              Kerja
             </div>
             <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900">
               Pengalaman
@@ -2268,6 +2286,113 @@
       const themeToggle = document.getElementById("theme-toggle");
       const languageStatus = document.getElementById("language-status");
 
+      const pageTranslations = {
+        "Halo! Saya": "Hello! I am",
+        "Lihat Projects": "View Projects",
+        "Hubungi Saya": "Contact Me",
+        "Available for Web Development & UI/UX Projects":
+          "Available for Web Development & UI/UX Projects",
+        "IPK 3.83 Telkom University": "GPA 3.83 Telkom University",
+        "PT DENSO Indonesia": "PT DENSO Indonesia",
+        "PT CAZH Teknologi": "PT CAZH Teknologi",
+        "Diskominfo Semarang": "Semarang Diskominfo",
+        "Fullstack Developer": "Fullstack Developer",
+        "Web Based System": "Web-Based System",
+        "System Analyst": "System Analyst",
+        "Digital Workflow": "Digital Workflow",
+        "IT Bachelor Graduated": "IT Bachelor Graduated",
+        Developer: "Developer",
+        "Web Developer & Digital Specialist":
+          "Web Developer & Digital Specialist",
+        "Profil &": "Profile &",
+        "Latar Belakang": "Background",
+        "Tentang Saya": "About Me",
+        "Pengembangan web modern, perancangan RESTful API, dan":
+          "Modern web development, RESTful API design, and",
+        "otomatisasi proses bisnis berbasis teknologi.":
+          "technology-based business process automation.",
+        "Summary Statement": "Summary Statement",
+        "Latar Belakang Profesional": "Professional Background",
+        Pendidikan: "Education",
+        "Keahlian Inti": "Core Expertise",
+        "S1 Teknik Informatika": "Bachelor of Informatics Engineering",
+        "REST API & Power Platform": "REST API & Power Platform",
+        "Pengalaman Kerja & Internship": "Work Experience & Internships",
+        Pengalaman: "Experience",
+        "Pengalaman Industri & Digitalisasi":
+          "Industry & Digitalization Experience",
+        "Sertifikasi & Lisensi": "Certifications & Licenses",
+        "Sertifikasi & Kredensial": "Certifications & Credentials",
+        "Proyek & Karya Pilihan": "Featured Projects & Works",
+        "Portfolio Showcase": "Portfolio Showcase",
+        "Kumpulan sistem web, landing page interaktif, dan desain UI/UX":
+          "A collection of web systems, interactive landing pages, and UI/UX designs",
+        "yang telah saya kembangkan.": "that I have developed.",
+        Mari: "Let's",
+        Berkolaborasi: "Collaborate",
+        "Email Utama": "Primary Email",
+        "LinkedIn Profil": "LinkedIn Profile",
+        "Nama Anda": "Your Name",
+        "Email Anda": "Your Email",
+        "Topik Diskusi": "Discussion Topic",
+        "Pesan Anda": "Your Message",
+        "Kirim Pesan": "Send Message",
+        "Peluang Kerja / Kolaborasi Proyek":
+          "Job Opportunity / Project Collaboration",
+        "Backend Laravel & Web Development":
+          "Laravel Backend & Web Development",
+        "UI/UX Design & Figma Project": "UI/UX Design & Figma Project",
+        "Workflow Automation & Power Platform":
+          "Workflow Automation & Power Platform",
+        Beranda: "Home",
+        Tentang: "About",
+        Pengalaman: "Experience",
+        Sertifikasi: "Certifications",
+        Proyek: "Projects",
+        Kontak: "Contact",
+        Detail: "Details",
+        Tutup: "Close",
+        "Lihat Bukti & Sertifikat": "View Proof & Certificate",
+        "Verifikasi Kredensial": "Verify Credential",
+        "Lihat Lampiran": "View Attachment",
+        "Download CV": "Download CV",
+      };
+
+      const pageTranslationsReverse = Object.fromEntries(
+        Object.entries(pageTranslations).map(([id, en]) => [en, id]),
+      );
+
+      function translatePage(language) {
+        const dictionary =
+          language === "en" ? pageTranslations : pageTranslationsReverse;
+        const textNodes = document.createTreeWalker(
+          document.body,
+          NodeFilter.SHOW_TEXT,
+        );
+        const nodes = [];
+        while (textNodes.nextNode()) nodes.push(textNodes.currentNode);
+        const entries = Object.entries(dictionary).sort(
+          (a, b) => b[0].length - a[0].length,
+        );
+
+        nodes.forEach((node) => {
+          if (node.parentElement.closest('script, style, [aria-hidden="true"]'))
+            return;
+          let translated = node.nodeValue;
+          entries.forEach(([source, target]) => {
+            const pattern = source.trim().split(/\s+/).join("\\s+");
+            translated = translated.replace(new RegExp(pattern, "g"), target);
+          });
+          node.nodeValue = translated;
+        });
+
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const idText = element.getAttribute("data-i18n");
+          element.textContent =
+            language === "en" ? pageTranslations[idText] || idText : idText;
+        });
+      }
+
       function updateThemeControl(isDark) {
         themeToggle.innerHTML = `<i data-lucide="${isDark ? "sun" : "moon"}" class="w-5 h-5" aria-hidden="true"></i>`;
         themeToggle.setAttribute(
@@ -2306,6 +2431,7 @@
           document.documentElement.lang === "id" ? "en" : "id";
         document.documentElement.lang = nextLanguage;
         languageToggle.textContent = nextLanguage.toUpperCase();
+        translatePage(nextLanguage);
         languageStatus.textContent =
           nextLanguage === "en"
             ? "English selected"
@@ -2322,6 +2448,7 @@
       if (savedLanguage === "en" || savedLanguage === "id") {
         document.documentElement.lang = savedLanguage;
         languageToggle.textContent = savedLanguage.toUpperCase();
+        translatePage(savedLanguage);
       }
 
       document.addEventListener("click", (event) => {
@@ -2483,6 +2610,40 @@
 
       revealElements.forEach((el) => revealObserver.observe(el));
 
+      const revealItemSelector =
+        "section h1, section h2, section h3, section form, section .glass-card, section .ticker-viewport";
+      let revealItemObserver;
+
+      function initializeContentReveal() {
+        if (!revealItemObserver) {
+          revealItemObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  revealItemObserver.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.12, rootMargin: "0px 0px -30px 0px" },
+          );
+        }
+
+        document
+          .querySelectorAll(revealItemSelector)
+          .forEach((element, index) => {
+            if (element.classList.contains("reveal-item")) return;
+            element.classList.add("reveal-item");
+            element.style.setProperty(
+              "--reveal-delay",
+              `${Math.min(index % 6, 5) * 0.07}s`,
+            );
+            revealItemObserver.observe(element);
+          });
+      }
+
+      initializeContentReveal();
+
       // Bottom Navigation Dock ScrollSpy
       const sections = document.querySelectorAll("section");
       const navItems = document.querySelectorAll(".dock-item");
@@ -2570,7 +2731,17 @@
       }
 
       function downloadCV() {
-        showToast("Mengunduh CV Muhamad Dimas Nurzaky...");
+        const cvLink = document.createElement("a");
+        cvLink.href = "Muhamad%20Dimas%20Nurzaky-resume%20(13).pdf";
+        cvLink.download = "Muhamad Dimas Nurzaky - CV.pdf";
+        document.body.appendChild(cvLink);
+        cvLink.click();
+        cvLink.remove();
+        showToast(
+          document.documentElement.lang === "en"
+            ? "Downloading Muhamad Dimas Nurzaky's CV..."
+            : "Mengunduh CV Muhamad Dimas Nurzaky...",
+        );
       }
 
       async function handleFormSubmit(e) {
@@ -2748,6 +2919,7 @@
           container.appendChild(card);
         });
         lucide.createIcons();
+        initializeContentReveal();
       }
 
       function renderExperiencesFromSupabase(experiences) {
@@ -2820,6 +2992,7 @@
           container.appendChild(card);
         });
         lucide.createIcons();
+        initializeContentReveal();
       }
 
       function renderCertificationsFromSupabase(certs) {
@@ -2875,6 +3048,7 @@
           container.appendChild(card);
         });
         lucide.createIcons();
+        initializeContentReveal();
       }
 
       // Initialize Supabase Fetch
